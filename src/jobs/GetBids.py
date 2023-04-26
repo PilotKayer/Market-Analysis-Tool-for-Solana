@@ -15,7 +15,8 @@ class GetBids(MRJob):
         test = test.replace('None', 'null')
         data = json.loads(test)
         keys = [
-            'type', 'price',
+            'type',
+            'price',
             'buyer',
         ]
 
@@ -39,6 +40,7 @@ class GetBids(MRJob):
 
     def reducer_2(self, key, values):
         yield key, sum(values)
+
 
 if __name__ == '__main__':
     GetBids.run()
