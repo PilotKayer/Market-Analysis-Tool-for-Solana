@@ -26,7 +26,6 @@ class Terminal:
             'types': self.service.get_activity_types,
             'full': self.service.get_full_collection,
         }
-        # todo: add a save to csv
 
     def help(self, args: list[str]) -> None:
         """
