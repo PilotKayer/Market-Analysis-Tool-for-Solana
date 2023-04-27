@@ -91,7 +91,7 @@ class MarketService:
             NFT_MINT_ATTRIBUTE[mint] = data
             return data
         except:
-            if result.status_code != 204 and result.status_code != 429:
+            if result.status_code == 400:
                 data = result.json()
                 if data['errors'][0]['msg'] == 'invalid token_mint':
                     return ['invalid token_mint']

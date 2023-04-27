@@ -3,14 +3,15 @@ from os.path import isfile, join, dirname, realpath
 from src.market.market_service import MarketService
 from src.jobs.job_service import JobService
 from src.common.logger import Logger, BColors
+from src.files.file_service import FileService
 from time import time
-import json
 
 
 class TerminalService:
     version: str
     market_service: MarketService
     job_service: JobService
+    file_service: FileService
     logger = Logger('TerminalService')
     data: any = {}
 
@@ -18,6 +19,7 @@ class TerminalService:
         self.version = version
         self.market_service = MarketService()
         self.job_service = JobService()
+        self.file_service = FileService()
 
     def check_args(self, args: list[str], number: int) -> bool:
         """
@@ -175,7 +177,8 @@ class TerminalService:
 
     def collect_bids(self, args: list[str]) -> None:
         """
-        Collects the bid's data for the collection
+        Collects the bid's data for the collection.
+        This collects only bids which target a specific token and not the whole collection.
 
         :param args: Collection name required as an argument
         """
@@ -302,7 +305,7 @@ class TerminalService:
             else:
                 self.logger.debug('Saving data')
                 for collection in list(self.data.keys()):
-                    self.save_file(collection)
+                    self.file_service.save_file(self.data[collection], collection)
         else:
             collection: str = args[1]
 
@@ -312,25 +315,9 @@ class TerminalService:
                 return
 
             self.logger.debug(f'Saving data for {collection}')
-            self.save_file(collection)
+            self.file_service.save_file(self.data[collection], collection)
 
         self.logger.debug('Data successfully saved')
-
-    def save_file(self, collection: str) -> None:
-        """
-        Save the collected data for a specific collection to a binary file
-
-        :param collection: The collection's name to be saved
-        """
-        time_stamp = self.data[collection]['data'][0]['blockTime']
-        dir_name = join(dirname(realpath(__file__)), '../../saves/')
-
-        try:
-            with open(f'{dir_name}{collection}.{time_stamp}.smt', 'w') as f:
-                f.write(json.dumps(self.data[collection]))
-        except Exception as e:
-            self.logger.error('An error was encountered while attempting to save to a file:')
-            self.logger.error(str(e))
 
     def save_to_csv(self, args: list[str]) -> None:
         """
@@ -348,30 +335,8 @@ class TerminalService:
             return
 
         self.logger.debug(f'Saving data for {col}')
-
-        time_stamp = self.data[col]['data'][0]['blockTime']
-        dir_name = join(dirname(realpath(__file__)), '../../saves/')
-        keys: list[str] = ['signature', 'type', 'source', 'tokenMint', 'collection', 'collectionSymbol', 'slot', 'blockTime', 'buyer', 'buyerReferral', 'seller', 'sellerReferral', 'price', 'image']
-
-        try:
-            with open(f'{dir_name}{col}_{time_stamp}_activities.csv', 'w') as f:
-                f.write('signature,type,source,tokenMint,collection,collectionSymbol,slot,blockTime,buyer,buyerReferral,seller,sellerReferral,price,image\n')
-
-                for data in self.data[col]['data']:
-                    out: str = ''
-
-                    for key in keys:
-                        if key in data.keys():
-                            out += f'{data[key]},'
-                        else:
-                            out += ','
-
-                    f.write(f'{out}\n')
-
-            self.logger.debug('Data successfully saved as csv')
-        except Exception as e:
-            self.logger.error('An error was encountered while attempting to save to a file:')
-            self.logger.error(str(e))
+        self.file_service.save_to_csv(self.data[col], col)
+        self.logger.debug('Data successfully saved as csv')
 
     def read_from_smt_file(self, args: list[str]) -> None:
         """
@@ -420,39 +385,11 @@ class TerminalService:
 
                 self.logger.debug('Fresh data collected, bids and attribute data needs to be recalculated')
 
-            self.load_file(file_name, collection, deprecated)
+            self.file_service.load_file(self.data, file_name, collection, deprecated)
 
             self.logger.debug('File loaded successfully')
         except ValueError:
             self.logger.error(f'Expected an integer from 1 to {len(list_of_files)}')
-
-    def load_file(self, file_name: str, collection: str, deprecated: bool) -> None:
-        """
-        Loads a specific smt binary file
-
-        :param file_name: The name of the file to load
-        :param collection: The collection name used to store in "self.data"
-        :param deprecated: If the file is deprecated or not
-        """
-        dir_name: str = join(dirname(realpath(__file__)), '../../saves/')
-
-        try:
-            with open(f'{dir_name}{file_name}', 'r') as f:
-                data = json.loads(f.read())
-
-                if deprecated:
-                    self.data[collection] = data
-                else:
-                    for data_point in data['data']:
-                        self.data[collection]['data'].append(data_point)
-
-                    if 'attribute_data' in data.keys():
-                        self.data[collection]['attribute_data'] = data['attribute_data']
-
-                self.data[collection]['time_stamp'] = self.data[collection]['data'][0]['blockTime']
-        except Exception as e:
-            self.logger.error('An error was encountered while attempting to load a file:')
-            self.logger.error(str(e))
 
     def get_nft_token(self, args: list[str]) -> None:
         """
@@ -580,7 +517,7 @@ class TerminalService:
                         self.data[collection]['time_stamp'] = data[0]['blockTime']
 
                     self.logger.debug('Loading file...')
-                    self.load_file(file_name, collection, deprecated)
+                    self.file_service.load_file(self.data, file_name, collection, deprecated)
                 except Exception as e:
                     self.logger.error(str(e))
 
@@ -598,7 +535,7 @@ class TerminalService:
             self.collect_attributes(['att', symbol])
 
         self.logger.debug('Saving data to file...')
-        self.save_file(symbol)
+        self.file_service.save_file(self.data[symbol], symbol)
 
         self.logger.debug('Full data loaded')
 

@@ -1,6 +1,6 @@
-from src.jobs.GetBids import GetBids
-from src.jobs.GetActAttributes import GetActAttributes
-from src.jobs.GetTypeCount import GetTypeCount
+from src.jobs.map_reduce_jobs.GetBids import GetBids
+from src.jobs.map_reduce_jobs.GetActAttributes import GetActAttributes
+from src.jobs.map_reduce_jobs.GetTypeCount import GetTypeCount
 from io import BytesIO
 
 
