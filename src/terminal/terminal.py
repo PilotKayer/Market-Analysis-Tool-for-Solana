@@ -20,6 +20,7 @@ class Terminal:
             'bids': self.service.collect_bids,
             'att': self.service.collect_attributes,
             'save': self.service.save_to_smt_file,
+            'csv': self.service.save_to_csv,
             'load': self.service.read_from_smt_file,
             'nft': self.service.get_nft_token,
             'types': self.service.get_activity_types,

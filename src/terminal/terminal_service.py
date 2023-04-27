@@ -1,4 +1,3 @@
-import os
 from os import system, name, listdir
 from os.path import isfile, join, dirname, realpath
 from src.market.market_service import MarketService
@@ -329,6 +328,47 @@ class TerminalService:
         try:
             with open(f'{dir_name}{collection}.{time_stamp}.smt', 'w') as f:
                 f.write(json.dumps(self.data[collection]))
+        except Exception as e:
+            self.logger.error('An error was encountered while attempting to save to a file:')
+            self.logger.error(str(e))
+
+    def save_to_csv(self, args: list[str]) -> None:
+        """
+        Crates a csv file with all the collected data for a specified collection
+
+        :param args: Collection name required as an argument
+        """
+        if self.check_args(args, 1):
+            return
+
+        col: str = args[1]
+        if col not in self.data.keys():
+            self.logger.error(f'No data found for {col}')
+            self.logger.error(f'Please run: clt {col}')
+            return
+
+        self.logger.debug(f'Saving data for {col}')
+
+        time_stamp = self.data[col]['data'][0]['blockTime']
+        dir_name = join(dirname(realpath(__file__)), '../../saves/')
+        keys: list[str] = ['signature', 'type', 'source', 'tokenMint', 'collection', 'collectionSymbol', 'slot', 'blockTime', 'buyer', 'buyerReferral', 'seller', 'sellerReferral', 'price', 'image']
+
+        try:
+            with open(f'{dir_name}{col}_{time_stamp}_activities.csv', 'w') as f:
+                f.write('signature,type,source,tokenMint,collection,collectionSymbol,slot,blockTime,buyer,buyerReferral,seller,sellerReferral,price,image\n')
+
+                for data in self.data[col]['data']:
+                    out: str = ''
+
+                    for key in keys:
+                        if key in data.keys():
+                            out += f'{data[key]},'
+                        else:
+                            out += ','
+
+                    f.write(f'{out}\n')
+
+            self.logger.debug('Data successfully saved as csv')
         except Exception as e:
             self.logger.error('An error was encountered while attempting to save to a file:')
             self.logger.error(str(e))
