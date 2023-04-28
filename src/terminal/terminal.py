@@ -37,7 +37,7 @@ class Terminal:
             for key in self.functions:
                 print(f'{key}:\t{self.functions[key].__doc__}')
         elif len(args) == 2:
-            symbol = args[1]
+            symbol = args[1].lower()
 
             if symbol not in self.functions.keys():
                 self.logger.error(f'No function {symbol} found')
