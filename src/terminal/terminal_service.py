@@ -2,7 +2,8 @@ from os import system, name, listdir
 from os.path import isfile, join, dirname, realpath
 from src.market.market_service import MarketService
 from src.jobs.job_service import JobService
-from src.common.logger import Logger, BColors
+from src.common.logger import Logger
+from src.common.commons import BColors
 from src.files.file_service import FileService
 from time import time
 

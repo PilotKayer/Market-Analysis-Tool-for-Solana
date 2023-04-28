@@ -1,4 +1,5 @@
-from src.common.logger import Logger, BColors
+from src.common.logger import Logger
+from src.common.commons import BColors
 from src.terminal.terminal_service import TerminalService
 
 
