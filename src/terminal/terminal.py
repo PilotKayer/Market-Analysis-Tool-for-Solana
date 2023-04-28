@@ -59,6 +59,8 @@ class Terminal:
             if len(args) == 0:
                 continue
 
+            args[0] = args[0].lower()
+
             if args[0] == 'exit' or args[0] == 'ext':
                 self.run = False
                 continue
