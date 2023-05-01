@@ -19,7 +19,7 @@ class Logger:
         if len(sys.argv) > 1:
             self.CMDS = sys.argv[1]
         else:
-            self.CMDS = 'el'
+            self.CMDS = 'e'
 
     def get_name(self) -> str:
         """
@@ -60,7 +60,7 @@ class Logger:
 
         :param text: The text to display
         """
-        if 'n' in self.CMDS:
+        if 'n' in self.CMDS or 'e' not in self.CMDS:
             return
 
         current = datetime.datetime.fromtimestamp(time())
