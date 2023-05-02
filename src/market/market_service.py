@@ -52,7 +52,7 @@ class MarketService:
         counter: int = 0
         err_counter: int = 0
 
-        while switch and err_counter < 99:
+        while switch and err_counter < 99 and counter < 151:
             data_points = self.get_collection_activities(collection_symbol, offset=counter*100)
 
             for data in data_points:
